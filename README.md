@@ -27,31 +27,30 @@ Before using the system, ensure you have the following installed:
 ## Installation Guide
 
 ### 1. Clone the Repository
-```bash
-git clone <repository-url>
-cd <repository-folder>
-### 1. Set Up a Virtual Environment
-```bash
+    ```bash
+    git clone <repository-url>
+    cd <repository-folder>
+### 2. Set Up a Virtual Environment
 Create and activate a virtual environment:
+    ```bash
+    # On Windows
+    python -m venv venv
+    venv\Scripts\activate
 
-# On Windows
-python -m venv venv
-venv\Scripts\activate
-
-# On macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
+    # On macOS/Linux
+    python3 -m venv venv
+    source venv/bin/activate
 
 ### 3. Install Dependencies
 Install the required Python packages using requirements.txt:
-```bash
-pip install -r requirements.txt
+    ```bash
+    pip install -r requirements.txt
 
 ### 4.Set Up Django
 Run the following commands to set up the Django project:
-```bash
-# Apply migrations
-python manage.py migrate
+    ```bash
+    # Apply migrations
+    python manage.py migrate
 
 # Start the development server
 python manage.py runserver
