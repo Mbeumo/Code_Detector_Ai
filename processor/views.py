@@ -33,18 +33,35 @@ def upload_video(request):
         request.session['summary_path'] = result.get("summary_txt", "")
         request.session['code_frames'] = result.get("code_frames", "")
         request.session['non_code_frames'] = result.get("non_code_frames", "")
+        request.session['code_audio_segments'] = result.get("code_audio_segments", []),
 
-        context.update({
+        frame={
+             # Store results in session
+            "summary_path" : result.get("summary_txt", ""),
+             "code_frames":result.get("code_frames", ""),
+            "non_code_frames":  result.get("non_code_frames", ""),
+            "code_audio_segments": result.get("code_audio_segments", []),
+        }
+        '''context.update({
             "video_url": video_url,
             "code_frames": result.get("code_frames", []),
             "non_code_frames": result.get("non_code_frames", []),
             "code_audio_segments": result.get("code_audio_segments", []),
-        })
+        })'''
 
-        return render(request, "result.html", context)
-        #return redirect('result_page')
+        return redirect('result_page')        #return redirect('result_page')
+    elif request.method == 'GET':
+        # Check if video_url exists in the session
+        video_url = request.session.get('video_url')
+        if video_url:
+            context["video_url"] = video_url
+            return render(request, "upload.html", context)
+        else:
+            context["error"] = "No video uploaded yet. Please upload a video."
+            return render(request, "upload.html", context)
 
-    return render(request, "upload.html", context)
+    else:
+        return render(request, "upload.html", context)
 
 def result_page(request):
     """Display the result page with summary and frames."""
