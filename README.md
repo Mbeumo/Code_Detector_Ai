@@ -37,7 +37,8 @@ Before using the system, ensure you have the following installed:
 
 **Option 1: Using Chocolatey (Recommended)**
     ```bash
-    choco install ffmpeg
+    choco install ffmpeg`
+    ```
 **Option 2: Manual Installation**
 
 --**Download the "essentials" ZIP from**
@@ -59,7 +60,7 @@ Before using the system, ensure you have the following installed:
 --**Edit System Variables → Path → New:**
     ```bash
     C:\ffmpeg\bin
-    ``
+    ```
 --**Restart your terminal/IDE**
 
 #### macOS
