@@ -1,0 +1,24 @@
+<h2>Upload a Video</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="video" placeholder="no file selected">
+    <button type="submit">Upload</button>
+</form>
+
+{% if video_url %}
+<h3>Uploaded Video:</h3>
+<video controls width="400">
+    <source src="{{ video_url }}" type="video/mp4">
+</video>
+<h3>Detected Code Frames:</h3>
+{% for frame in code_frames %}
+<img src="/media/dataset/code/{{ frame }}" width="100" alt="no image frame">
+{% endfor %}
+
+<h3>Code-like Audio Segments:</h3>
+<ul>
+    {% for segment in code_audio_segments %}
+    <li>{{ segment }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
