@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classification Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h1,
+        h2 {
+            color: #333;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            background: #f1f1f1;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .code {
+            background-color: #d4edda;
+        }
+
+        .no-code {
+            background-color: #f8d7da;
+        }
+
+        .audio {
+            background-color: #d1ecf1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Video Classification Results</h1>
+
+    <div class="section">
+        <h2>✅ Code Frames</h2>
+        {% if frames.code_frames %}
+        <ul>
+            {% for frame in frames.code_frames %}
+            <li class="code">Frame at {{ frame }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No frames with code detected.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h2>❌ Non-Code Frames</h2>
+        {% if frames.non_code_frames %}
+        <ul>
+            {% for frame in frames.non_code_frames %}
+            <li class="no-code">Frame at {{ frame }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No non-code frames detected.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h2>🔊 Code-related Audio Segments</h2>
+        {% if frames.code_audio_segments %}
+        <ul>
+            {% for segment in frames.code_audio_segments %}
+            <li class="audio">Audio from {{ segment.start }} to {{ segment.end }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No code-related audio detected.</p>
+        {% endif %}
+    </div>
+
+</body>
+
+</html>

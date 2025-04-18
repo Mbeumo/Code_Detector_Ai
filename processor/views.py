@@ -17,5 +17,6 @@ def upload_video(request):
         context["code_frames"] = result["code_frames"]
         context["non_code_frames"] = result["non_code_frames"]
         context["code_audio_segments"] = result["code_audio_segments"]
+        return render(request, "result.html", {"frames": result})
 
     return render(request, "upload.html", context)
