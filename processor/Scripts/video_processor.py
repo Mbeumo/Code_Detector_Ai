@@ -59,16 +59,28 @@ def detect_code_via_ocr(image_path):
         pass
     return False
 
-def classify_frames():
-    for filename in os.listdir(FRAME_DIR):
-        path = os.path.join(FRAME_DIR, filename)
-        img = cv2.imread(path)
+def classify_frames(video_path):
+    cap = cv2.VideoCapture(video_path)
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    frame_names = sorted(os.listdir(FRAME_DIR))
+    code_timestamps = []
+
+    for i, frame_name in enumerate(frame_names):
+        frame_path = os.path.join(FRAME_DIR, frame_name)
+        img = cv2.imread(frame_path)
         if img is None:
             continue
-        if is_code_frame(img) or detect_code_via_ocr(path):
-            shutil.copy(path, os.path.join(DATASET_DIR, "code", filename))
+
+        if is_code_frame(img):
+            shutil.copy(frame_path, f"{DATASET_DIR}/code/{frame_name}")
+            seconds = i // fps
+            time_str = str(timedelta(seconds=seconds))
+            code_timestamps.append((frame_name, time_str))
         else:
-            shutil.copy(path, os.path.join(DATASET_DIR, "non_code", filename))
+            shutil.copy(frame_path, f"{DATASET_DIR}/non_code/{frame_name}")
+
+    cap.release()
+    return code_timestamps
 
 def extract_audio(video_path):
     import moviepy.editor as mp
@@ -88,11 +100,24 @@ def classify_audio():
 def classify_video(video_path):
     setup_dirs()
     extract_frames(video_path)
-    classify_frames()
+    code_frame_timestamps = classify_frames(video_path)
     extract_audio(video_path)
     code_audio = classify_audio()
+
+    result_txt_path = os.path.join("media", "code_summary.txt")
+    with open(result_txt_path, "w", encoding="utf-8") as f:
+        f.write("=== CODE FRAMES DETECTED (with Timestamps) ===\n")
+        for frame_name, timestamp in code_frame_timestamps:
+            f.write(f"{timestamp}: {frame_name}\n")
+
+        f.write("\n=== CODE AUDIO SEGMENTS ===\n")
+        for line in code_audio:
+            f.write(f"{line}\n")
+
     return {
-        "code_frames": os.listdir(os.path.join(DATASET_DIR, "code")),
+        "code_frames": [item[0] for item in code_frame_timestamps],
         "non_code_frames": os.listdir(os.path.join(DATASET_DIR, "non_code")),
-        "code_audio_segments": code_audio
+        "code_audio_segments": code_audio,
+        "summary_txt": result_txt_path
     }
+
