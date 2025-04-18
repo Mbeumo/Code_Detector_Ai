@@ -109,47 +109,84 @@ def extract_audio(video_path):
     clip.audio.write_audiofile(AUDIO_PATH)
 
 def classify_audio():
-    model = whisper.load_model("base")
-    result = model.transcribe(AUDIO_PATH)
-    code_lines = []
-    for segment in result['segments']:
-        text = segment['text'].lower()
-        if any(kw in text for kw in CODE_KEYWORDS):
-            code_lines.append({
-                "start": str(timedelta(seconds=segment['start'])),
-                "end": str(timedelta(seconds=segment['end'])),
-                "text": segment['text']
-            })
-    return code_lines
+    try:
+        # Load the Whisper model
+        model = whisper.load_model("base")
+        print("Whisper model loaded successfully.")
+
+        # Transcribe the audio file
+        result = model.transcribe(AUDIO_PATH)
+        print("Audio transcription completed.")
+
+        code_lines = []
+        for segment in result.get('segments', []):
+            text = segment['text'].lower()
+            if any(kw in text for kw in CODE_KEYWORDS):
+                print(f"Code-related audio detected: {segment['text']}")
+                code_lines.append({
+                    "start": str(timedelta(seconds=segment['start'])),
+                    "end": str(timedelta(seconds=segment['end'])),
+                    "text": segment['text']
+                })
+
+        print(f"Total code-related audio segments detected: {len(code_lines)}")
+        return code_lines
+
+    except FileNotFoundError:
+        print(f"Error: Audio file not found at {AUDIO_PATH}.")
+        return []
+
+    except Exception as e:
+        print(f"Error during audio classification: {e}")
+        return []
 
 def classify_video(video_path):
-    setup_dirs()
+    try:
+        setup_dirs()
 
-    # Extract frames using this prefix
-    extract_frames(video_path, prefix)
+        # Extract frames using this prefix
+        extract_frames(video_path, prefix)
+        print("Frames extracted successfully.")
 
-    # Get FPS
-    cap = cv2.VideoCapture(video_path)
-    fps = int(cap.get(cv2.CAP_PROP_FPS))
-    cap.release()
+        # Get FPS
+        cap = cv2.VideoCapture(video_path)
+        fps = int(cap.get(cv2.CAP_PROP_FPS))
+        cap.release()
+        print(f"Video FPS: {fps}")
 
-    code_frame_timestamps = classify_frames(prefix, fps)
-    extract_audio(video_path)
-    code_audio = classify_audio()
+        # Classify frames
+        code_frame_timestamps = classify_frames(prefix, fps)
+        print(f"Total code frames detected: {len(code_frame_timestamps)}")
 
-    result_txt_path = os.path.join("media", f"code_summary_{prefix}.txt")
-    with open(result_txt_path, "w", encoding="utf-8") as f:
-        f.write("=== CODE FRAMES DETECTED (with Timestamps) ===\n")
-        for frame_name, timestamp in code_frame_timestamps:
-            f.write(f"{timestamp}: {frame_name}\n")
+        # Extract and classify audio
+        extract_audio(video_path)
+        print("Audio extracted successfully.")
+        code_audio = classify_audio()
 
-        f.write("\n=== CODE AUDIO SEGMENTS ===\n")
-        for line in code_audio:
-            f.write(f"{line['start']} - {line['end']}: {line['text']}\n")
+        # Write results to summary file
+        result_txt_path = os.path.join("media", f"code_summary_{prefix}.txt")
+        with open(result_txt_path, "w", encoding="utf-8") as f:
+            f.write("=== CODE FRAMES DETECTED (with Timestamps) ===\n")
+            for frame_name, timestamp in code_frame_timestamps:
+                f.write(f"{timestamp}: {frame_name}\n")
 
-    return {
-        "code_frames": [item[0] for item in code_frame_timestamps],
-        "non_code_frames": os.listdir(os.path.join(DATASET_DIR, "non_code")),
-        "code_audio_segments": code_audio,
-        "summary_txt": result_txt_path
-    }
+            f.write("\n=== CODE AUDIO SEGMENTS ===\n")
+            for line in code_audio:
+                f.write(f"{line['start']} - {line['end']}: {line['text']}\n")
+
+        print(f"Summary file written successfully: {result_txt_path}")
+        return {
+            "code_frames": [item[0] for item in code_frame_timestamps],
+            "non_code_frames": os.listdir(os.path.join(DATASET_DIR, "non_code")),
+            "code_audio_segments": code_audio,
+            "summary_txt": result_txt_path
+        }
+
+    except Exception as e:
+        print(f"Error during video classification: {e}")
+        return {
+            "code_frames": [],
+            "non_code_frames": [],
+            "code_audio_segments": [],
+            "summary_txt": None
+        }
