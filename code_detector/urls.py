@@ -25,5 +25,12 @@ from processor import views
     path("admin/", admin.site.urls),
 ]"""
 urlpatterns = [
-    path('', views.upload_video, name='upload_video'),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('upload/', views.upload_video, name='upload_video'),
+    path('result/', views.result_page, name='result_page'),
+
+] 
+
+# Serve static and media files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

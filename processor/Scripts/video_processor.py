@@ -35,6 +35,8 @@ CODE_KEYWORDS = [
     ";", "{", "}", "(", ")", "[", "]"
 ]
 
+#can change this model to a custom model created 
+#but no tguarnateed of the accuracy as not enougth data is provided
 model = MobileNetV2(weights="imagenet", include_top=True)
 
 def setup_dirs():
